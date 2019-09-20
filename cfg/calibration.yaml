@@ -1,0 +1,12 @@
+base_path: /home/mitchell/WAMP_WS2/AMP-proc/calibration/
+
+K1: [True, camera1/intrinsic_matrix.csv]
+K2: [True, camera2/intrinsic_matrix.csv]
+d1: [True, camera1/distortion_coeffs.csv]
+d2: [True, camera2/distortion_coeffs.csv]
+R: [True, R.csv]
+t: [True, T.csv]
+P1: [False, ]
+P2: [False, ]
+
+
