@@ -1,14 +1,12 @@
 from distutils.core import setup
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
 
 setup(
-    name="AMP-proc",
+    name="ampProc",
     version="0.1",
-    scripts="[point_triangulation.py]",
+    packages=['ampProc'],
     author="Mitchell Scott",
     author_email="miscott@uw.edu",
     description="An AMP image processing package",
-    long_description=long_description,
+    long_description=open('README.md').read(),
 )

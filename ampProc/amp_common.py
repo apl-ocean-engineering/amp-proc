@@ -7,7 +7,9 @@
 
 import signal
 import datetime
-
+import glob
+import sys
+import time
 import cv2
 import numpy as np
 
@@ -46,7 +48,8 @@ class ampCommon:
 
     def _check_date(self, f1, f2):
         """
-        Verify that the image timestamps are less than self.time_delay_allowed apart
+        Verify that the image timestamps are less than self.time_delay_allowed
+        apart
         Inputs:
             f1(str): Frame1 name
             f2(str): Frame2 name
@@ -111,7 +114,6 @@ class ampCommon:
                 if self._check_date(fname1, images[loc][1]):
 
                     return fname1, images[loc][1]
-                #print(fname1, images[loc][1], self._time_diff(fname1, images[loc][1]) > prev_time_diff)
                 if self._time_diff(fname1, images[loc][1]) > prev_time_diff:
                     # Diverging, break
                     return None, None  # fname1, images[loc-1][1]
