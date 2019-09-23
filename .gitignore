@@ -1,2 +1,3 @@
-ampProc.egg-info
+ampProc.egg-info/
 scripts/*pyc
+ampProc/*pyc
