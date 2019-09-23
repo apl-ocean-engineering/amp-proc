@@ -12,11 +12,11 @@ import copy
 
 import sys
 from os.path import dirname, abspath
-sys.path.append(dirname(dirname(abspath(__file__))) + '/lib')
+# sys.path.append(dirname(dirname(abspath(__file__))) + '/lib')
 
-from intrinsic_extrinsic import Loader, ExtrinsicIntrnsicLoaderSaver
-from point_identification3 import PointIdentification3D
-from constans import Constants
+from ampProc.intrinsic_extrinsic import Loader, ExtrinsicIntrnsicLoaderSaver
+from ampProc.point_identification3 import PointIdentification3D
+# from ampProc.constans import Constants
 
 
 def calculate_norm_distance(distance):

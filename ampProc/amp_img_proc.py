@@ -9,7 +9,6 @@ import os
 import sys
 import signal
 import logging
-import time
 import datetime
 
 import cv2
