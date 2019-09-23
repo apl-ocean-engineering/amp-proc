@@ -63,7 +63,15 @@ class Loader:
 
 
 class Paramters:
-    im_size = (0,0)
+    """
+    Paramaters class for extrinsic and intrinsic stereo camera properties
+    K1/2: Intrinsic Paramaters
+    d1/d2: Distortion paramaters
+    R: Rotation matrix between cameras
+    t: translation vector between cameras
+    P1/P2: Projection matrix
+    """
+    im_size = (0, 0)
     K1 = np.eye(3)
     K2 = np.eye(3)
     d1 = np.zeros(5)
@@ -75,12 +83,28 @@ class Paramters:
 
 
 class ExtrinsicIntrnsicLoaderSaver:
+    """
+    Helper class to load and calculate projection matricies
+    Attributes:
+        paramters: Object containing camera paramaters
+    Methods:
+        calculate_projection_matracies: Calculate projection matrices and update
+        paramters
+    """
     def __init__(self, paramLoader, im_size):
+        """
+        Input:
+            paramLoader: Dictonary of calibration matricies
+        """
         self.paramaters = Paramters
         self.paramaters.im_size = im_size
         self._load_params(paramLoader)
 
     def calculate_projection_matracies(self):
+        """
+        Calculates projection matricies from R and t matricies. Updates
+        paramters attribute
+        """
         _p1 = np.zeros((3, 4), dtype=float)
         _p1[0, 0] = 1.0
         _p1[1, 1] = 1.0
@@ -91,8 +115,11 @@ class ExtrinsicIntrnsicLoaderSaver:
 
         self.paramaters.P1 = np.float64(P1)
         self.paramaters.P2 = np.float64(P2)
-        
+
     def _load_params(self, paramLoader):
+        """
+        Set paramters to paramLoader
+        """
         if paramLoader.K1[0]:
             self.paramaters.K1 = np.float64(np.loadtxt(
                 paramLoader.base_path + paramLoader.K1[1], delimiter=','))

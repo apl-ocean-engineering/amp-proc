@@ -99,16 +99,17 @@ class PointClick(object):
         if len(self.x1_points) != len(self.x2_points):
             raise AttributeError("Unequal Points Clicked")
         # Organize points
-        pnts1 = np.array([[self.x1_points[0], self.x1_points[1]], [self.y1_points[0], self.y1_points[1]]])
-        pnts2 = np.array([[self.x2_points[0], self.x2_points[1]], [self.y2_points[0], self.y2_points[1]]])
-        #pnts1 = np.array([[self.x1_points[0]], [self.y1_points[0]]])
-        #pnts2 = np.array([[self.x2_points[0]], [self.y2_points[0]]])
-        # for i in range(1, len(self.x1_points)):
-        #     np.append(pnts1, [[self.x1_points[i]], [self.y1_points[i]]], axis = 1)
-        #     np.append(pnts2, [[self.x2_points[i]], [self.y2_points[i]]], axis = 1)
-        # Must be float 32s to work in OpenCV
-        pnts1 = np.float32(pnts1)
-        pnts2 = np.float32(pnts2)
+        pnts1 = np.array([[self.x1_points[0]], [self.y1_points[0]]])
+        pnts2 = np.array([[self.x2_points[0]], [self.y2_points[0]]])
+        for i in range(1, len(self.x1_points)):
+            pnts1 = np.concatenate((pnts1,
+                [[self.x1_points[i]], [self.y1_points[i]]]), axis=1)
+            pnts2 = np.concatenate((pnts2,
+                [[self.x2_points[i]], [self.y2_points[i]]]), axis=1)
+
+        # Must be float 64s to work in OpenCV
+        pnts1 = np.float64(pnts1)
+        pnts2 = np.float64(pnts2)
 
         return pnts1, pnts2
 
