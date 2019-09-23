@@ -1,4 +1,5 @@
 README.md
+setup.py
 ampProc/__init__.py
 ampProc/amp_common.py
 ampProc/amp_img_proc.py
