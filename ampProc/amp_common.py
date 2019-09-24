@@ -17,6 +17,39 @@ class ampCommon:
     def __init__(self, time_delay_allowed=0.05):
         self.time_delay_allowed = time_delay_allowed
 
+    def time_diff(self, f1, f2):
+        """
+        Verify that the image timestamps are less than self.time_delay_allowed apart
+        Inputs:
+            f1(str): Frame1 name
+            f2(str): Frame2 name
+
+        Return:
+            Bool: If timestamps are close enough together
+        """
+        time1 = float(
+            '.'.join(f1.split('/')[-1].split('_')[-1].split('.')[0:2]))
+        time2 = float(
+            '.'.join(f2.split('/')[-1].split('_')[-1].split('.')[0:2]))
+
+        return abs(time1 - time2)
+
+    def find_date(self, images, i):
+        fname1 = images[i][0]
+        fname2 = images[0][1]
+        prevtime_diff = self.time_diff(fname1, fname2)
+
+        for loc in range(0, len(images)):
+            if self._check_day_hour(fname1, images[loc][1]):
+                if self._check_date(fname1, images[loc][1]):
+
+                    return fname1, images[loc][1]
+                if self.time_diff(fname1, images[loc][1]) > prevtime_diff:
+                    # Diverging, break
+                    return None, None  # fname1, images[loc-1][1]
+                prevtime_diff = self.time_diff(fname1, images[loc][1])
+        return None, None
+
     def _subdirs(self):
         """
         Return list of all subdirectories under current directory containing
@@ -68,23 +101,6 @@ class ampCommon:
 
         return False
 
-    def _time_diff(self, f1, f2):
-        """
-        Verify that the image timestamps are less than self.time_delay_allowed apart
-        Inputs:
-            f1(str): Frame1 name
-            f2(str): Frame2 name
-
-        Return:
-            Bool: If timestamps are close enough together
-        """
-        time1 = float(
-            '.'.join(f1.split('/')[-1].split('_')[-1].split('.')[0:2]))
-        time2 = float(
-            '.'.join(f2.split('/')[-1].split('_')[-1].split('.')[0:2]))
-
-        return abs(time1 - time2)
-
     def _check_day_hour(self, f1, f2):
         """
         Verify that the image timestamps are less than self.time_delay_allowed apart
@@ -103,22 +119,6 @@ class ampCommon:
             return True
 
         return False
-
-    def _find_date(self, images, i):
-        fname1 = images[i][0]
-        fname2 = images[0][1]
-        prev_time_diff = self._time_diff(fname1, fname2)
-
-        for loc in range(0, len(images)):
-            if self._check_day_hour(fname1, images[loc][1]):
-                if self._check_date(fname1, images[loc][1]):
-
-                    return fname1, images[loc][1]
-                if self._time_diff(fname1, images[loc][1]) > prev_time_diff:
-                    # Diverging, break
-                    return None, None  # fname1, images[loc-1][1]
-                prev_time_diff = self._time_diff(fname1, images[loc][1])
-        return None, None
 
     def _beyond_date(self, date, start_date):
         if start_date == ' ':
