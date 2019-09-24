@@ -12,11 +12,8 @@ import copy
 
 import sys
 from os.path import dirname, abspath
-# sys.path.append(dirname(dirname(abspath(__file__))) + '/lib')
-
 from ampProc.intrinsic_extrinsic import Loader, ExtrinsicIntrnsicLoaderSaver
 from ampProc.point_identification3 import PointIdentification3D
-# from ampProc.constans import Constants
 
 
 def calculate_norm_distance(distance):
@@ -52,7 +49,7 @@ def main():
     parser.add_argument("--img2", help="Path to img2", default="/img2.png")
     parser.add_argument("--calibration_yaml",
         help="Path to calibration yaml specify path of calibration files",
-        default=dirname(dirname(abspath(__file__))) + "/cfg/calibration.yaml")
+        default=dirname(dirname(abspath(__file__))) + "/cfg/calibrationConfig.yaml")
 
     args = parser.parse_args()
 
