@@ -5,17 +5,56 @@
 @contact: miscott@uw.edu
 """
 
-import signal
 import datetime
 import glob
 import sys
 import time
-import cv2
 import numpy as np
 
+
 def save_np_array(save_name, mat):
-        np.savetxt(save_name, mat,
-                               fmt="%1.3f", delimiter=",")
+    np.savetxt(save_name, mat, fmt="%1.3f", delimiter=",")
+
+
+class CvSquare:
+    def __init__(self, img_size):
+        self.lower_x = 0
+        self.lower_y = 0
+        self.upper_x = 0
+        self.upper_y = 0
+
+        self.img_size = img_size
+
+    def set_square(self, lower_x, lower_y, upper_x, upper_y):
+        """
+        Define square values
+        """
+        self.lower_x = lower_x
+        self.lower_y = lower_y
+        self.upper_x = upper_x
+        self.upper_y = upper_y
+
+    def set_from_YOLO_square(self, sq):
+        """
+        Set from YOLO detection square
+        """
+        self.lower_x = sq.lower_x
+        self.lower_y = sq.lower_y
+        self.upper_x = sq.upper_x
+        self.upper_y = sq.upper_y
+
+    def move_square(self, motion=1):
+        """
+        Move square in forward horizontal direction by motion (default 1)
+        """
+        if (self.upper_x < self.img_size[0]):
+            self.lower_x += motion
+            self.upper_x += motion
+            #print(self.upper_x)
+            return True
+
+        return False
+
 
 class ampCommon:
     def __init__(self, time_delay_allowed=0.05):
@@ -23,7 +62,7 @@ class ampCommon:
 
     def time_diff(self, f1, f2):
         """
-        Verify that the image timestamps are less than self.time_delay_allowed apart
+        Verify that image timestamps are less than time_delay_allowed apart
         Inputs:
             f1(str): Frame1 name
             f2(str): Frame2 name
@@ -107,7 +146,7 @@ class ampCommon:
 
     def _check_day_hour(self, f1, f2):
         """
-        Verify that the image timestamps are less than self.time_delay_allowed apart
+        Verify that image timestamps are less than time_delay_allowed apart
         Inputs:
             f1(str): Frame1 name
             f2(str): Frame2 name
