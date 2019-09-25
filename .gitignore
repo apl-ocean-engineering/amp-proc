@@ -1,3 +1,4 @@
 ampProc.egg-info/
 scripts/*pyc
 ampProc/*pyc
+ampProc/__pycache__/
