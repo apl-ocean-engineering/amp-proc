@@ -6,6 +6,7 @@
 """
 import numpy as np
 import cv2
+import ampProc.amp_common as amp_common
 
 
 class Loader:
@@ -29,6 +30,9 @@ class Loader:
     # Projection matrices
     P1 = [False, " "]
     P2 = [False, " "]
+    #Rectification matricies
+    R1 = [False, " "]
+    R2 = [False, " "]
 
     def __init__(self):
         """
@@ -46,6 +50,8 @@ class Loader:
         self.parms["t"] = self.t
         self.parms["P1"] = self.P1
         self.parms["P2"] = self.P2
+        self.parms["R1"] = self.R1
+        self.parms["R2"] = self.R2
         for key in calibration_loader.keys():
             self.parms[key] = calibration_loader[key]
         self.set_params()
@@ -60,11 +66,14 @@ class Loader:
         self.t = self.parms["t"]
         self.P1 = self.parms["P1"]
         self.P2 = self.parms["P2"]
+        self.R1 = self.parms["R1"]
+        self.R2 = self.parms["R2"]
 
 
 class Paramters:
     """
     Paramaters class for extrinsic and intrinsic stereo camera properties
+    params: dictionary with all paramaters
     K1/2: Intrinsic Paramaters
     d1/d2: Distortion paramaters
     R: Rotation matrix between cameras
@@ -80,6 +89,9 @@ class Paramters:
     t = np.zeros(3)
     P1 = None
     P2 = None
+    R1 = None
+    R2 = None
+
 
 
 class ExtrinsicIntrnsicLoaderSaver:
@@ -100,6 +112,16 @@ class ExtrinsicIntrnsicLoaderSaver:
         self.paramaters.im_size = im_size
         self._load_params(paramLoader)
 
+    def calculate_rectification_matracies(self):
+        R1, R2, P1, P2, Q, validPixROI1, validPixROI2 = cv2.stereoRectify(
+                self.paramaters.K1, self.paramaters.d1,
+                self.paramaters.K2, self.paramaters.d2,
+                self.paramaters.im_size, self.paramaters.R,
+                self.paramaters.t)
+        self.paramaters.R1 = np.float64(R1)
+        self.paramaters.R2 = np.float64(R2)
+        self.paramaters.Q = np.float64(Q)
+
     def calculate_projection_matracies(self):
         """
         Calculates projection matricies from R and t matricies. Updates
@@ -115,6 +137,15 @@ class ExtrinsicIntrnsicLoaderSaver:
 
         self.paramaters.P1 = np.float64(P1)
         self.paramaters.P2 = np.float64(P2)
+
+    def save_paramater(self, paramater, save_name):
+        """
+        Save a paramater
+        Input:
+            paramater: np.ndarry type to save
+            save_name: full save path
+        """
+        amp_common.save_np_array(save_name, paramater)
 
     def _load_params(self, paramLoader):
         """
@@ -144,3 +175,9 @@ class ExtrinsicIntrnsicLoaderSaver:
         if paramLoader.P2[0]:
             self.paramaters.P2 = np.float64(np.loadtxt(
                 paramLoader.base_path + paramLoader.P2[1], delimiter=','))
+        if paramLoader.R1[0]:
+            self.paramaters.R1 = np.float64(np.loadtxt(
+                paramLoader.base_path + paramLoader.R1[1], delimiter=','))
+        if paramLoader.R2[0]:
+            self.paramaters.R2 = np.float64(np.loadtxt(
+                paramLoader.base_path + paramLoader.R2[1], delimiter=','))

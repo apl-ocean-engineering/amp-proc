@@ -8,7 +8,6 @@ import yaml
 from time import sleep
 from os.path import dirname, abspath
 from ampProc.intrinsic_extrinsic import Loader, ExtrinsicIntrnsicLoaderSaver
-import numpy as np
 
 
 def draw_circles(img, square, radius=10, color=(255, 0, 0)):
@@ -28,7 +27,7 @@ def draw_circles(img, square, radius=10, color=(255, 0, 0)):
 def main(detector):
     with open(args.calibration_yaml, 'r') as stream:
         calibration_loader = yaml.safe_load(stream)
-        
+
     loader = Loader()
     loader.load_params_from_file(calibration_loader)
 
@@ -46,26 +45,30 @@ def main(detector):
     img1 = cv2.imread(images[0][0])
     im_size = img1.shape[:2]
     EI_loader = ExtrinsicIntrnsicLoaderSaver(loader, im_size)
-    # Get rectification maps
-    R1, R2, P1, P2, Q, validPixROI1, validPixROI2 = cv2.stereoRectify(
-            EI_loader.paramaters.K1, EI_loader.paramaters.d1,
-            EI_loader.paramaters.K2, EI_loader.paramaters.d2,
-            EI_loader.paramaters.im_size, EI_loader.paramaters.R,
-            EI_loader.paramaters.t)
-    new_k2 = np.eye(3)
-    EI_loader.paramaters.d2[4] = 0
+    # # Get rectification maps
+    if EI_loader.paramaters.R1 is None or EI_loader.paramaters.R1 is None:
+        EI_loader.calculate_rectification_matracies()
+    # new_k2 = np.eye(3)
+    # EI_loader.paramaters.d2[4] = 0
     new_k2, roi = cv2.getOptimalNewCameraMatrix(
         EI_loader.paramaters.K2, EI_loader.paramaters.d2, im_size, 1, im_size)
     # Compute rectification maps
+    print(EI_loader.paramaters.R2.shape, new_k2.shape)
     map1, map2 = cv2.initUndistortRectifyMap(
-            EI_loader.paramaters.K2, EI_loader.paramaters.d2, R2,
-            new_k2, im_size, cv2.CV_32FC1)
+            EI_loader.paramaters.K2, EI_loader.paramaters.d2,
+            EI_loader.paramaters.R2, new_k2, im_size, cv2.CV_32FC1)
 
     for i in range(len(images)):
         frame1, frame2 = ac.find_date(images, i)
         if frame1 is not None and frame2 is not None:
             img1 = cv2.imread(frame1)
             img2 = cv2.imread(frame2)
+            print(EI_loader.paramaters.d1)
+            print(EI_loader.paramaters.d2)
+            img1 = cv2.undistort(
+                img1, EI_loader.paramaters.K1, EI_loader.paramaters.d1)
+            img2 = cv2.undistort(
+                img2, EI_loader.paramaters.K2, EI_loader.paramaters.d2)
             # rectify image 2
             img2 = cv2.remap(img2, map1, map2, cv2.INTER_LINEAR)
 
@@ -95,7 +98,8 @@ if __name__ == '__main__':
     argLoader.parser.add_argument(
         "--calibration_yaml",
         help="Path to calibration yaml specify path of calibration files",
-        default=dirname(dirname(abspath(__file__))) + "/cfg/calibration.yaml")
+        default=dirname(dirname(abspath(
+            __file__))) + "/cfg/calibrationConfig.yaml")
     args = argLoader.args  # parse the command line arguments
     pause = 0.01
 
