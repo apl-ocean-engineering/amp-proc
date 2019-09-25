@@ -13,6 +13,10 @@ import time
 import cv2
 import numpy as np
 
+def save_np_array(save_name, mat):
+        np.savetxt(save_name, mat,
+                               fmt="%1.3f", delimiter=",")
+
 class ampCommon:
     def __init__(self, time_delay_allowed=0.05):
         self.time_delay_allowed = time_delay_allowed

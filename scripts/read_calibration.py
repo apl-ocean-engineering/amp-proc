@@ -9,14 +9,14 @@ Code to read yaml 1.0 docs and convert them to yaml 1.1 calibration paramters
 """
 import cv2
 import numpy as np
-
 import argparse
 from os.path import dirname, abspath
+import ampProc.amp_common as amp_common
 
 def get_save_node(f, name, save_name):
     mat = f.getNode(name).mat()
-    np.savetxt(save_name, mat,
-                           fmt="%1.3f", delimiter=",")
+    amp_common.save_np_array(save_name, mat)
+
 
 def parse_file_storage(args):
     f = cv2.FileStorage(args.calibration_yaml, cv2.FILE_STORAGE_READ)
