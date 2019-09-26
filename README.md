@@ -28,6 +28,6 @@ trigger is raised when 1 of the following conditions is met:
 1. 6 or more fish are present in one camera image
 2. 3 or more fish are present in both camera images
 3. A positive trigger from a rectified image analysis algorithm
-  - This algorithm involves rectifying both stereo images, and
+   - This algorithm involves rectifying both stereo images, and
     searching along the x axis to verify a detection with a similar size
     has been found in a similar location
