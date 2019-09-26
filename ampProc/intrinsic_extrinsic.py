@@ -54,9 +54,9 @@ class Loader:
         self.parms["R2"] = self.R2
         for key in calibration_loader.keys():
             self.parms[key] = calibration_loader[key]
-        self.set_params()
+        self._set_params()
 
-    def set_params(self):
+    def _set_params(self):
         self.base_path = self.parms["base_path"]
         self._set_path(self.K1, self.parms["K1"])
         self._set_path(self.K2, self.parms["K2"])
