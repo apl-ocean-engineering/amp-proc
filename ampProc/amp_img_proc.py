@@ -141,11 +141,11 @@ class BasePath(object):
             folder_name = names[len(names) - 2]
 
             if folder_name[0:2] == "20":
+                #print(folder_name)
                 #print(names[len(names) - 2])
-                hour = self.get_hour(names[len(names) - 2])
-                print(hour)
-                if hour >= self.hour_min and hour <= self.hour_max:
-
+                # hour = self.get_hour(names[len(names) - 2])
+                # print(hour)
+                # if hour >= self.hour_min and hour <= self.hour_max:
                     return_subdirs.append(path)
         return return_subdirs
 
