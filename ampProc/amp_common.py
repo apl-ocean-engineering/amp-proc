@@ -3,6 +3,8 @@
 """
 @author: Mitchell Scott
 @contact: miscott@uw.edu
+
+Common scripts amongst AMP processing code
 """
 
 import datetime
@@ -17,7 +19,15 @@ def save_np_array(save_name, mat):
 
 
 class CvSquare:
+    """
+    Simple square object which will 'move', for AMP rectified image stereo
+    fish detection
+    """
     def __init__(self, img_size):
+        """
+        Input:
+            img_size(tuple (x,y)): Size of image to verify in bounds status
+        """
         self.lower_x = 0
         self.lower_y = 0
         self.upper_x = 0

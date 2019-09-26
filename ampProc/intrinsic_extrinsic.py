@@ -58,16 +58,22 @@ class Loader:
 
     def set_params(self):
         self.base_path = self.parms["base_path"]
-        self.K1 = self.parms["K1"]
-        self.K2 = self.parms["K2"]
-        self.d1 = self.parms["d1"]
-        self.d2 = self.parms["d2"]
-        self.R = self.parms["R"]
-        self.t = self.parms["t"]
-        self.P1 = self.parms["P1"]
-        self.P2 = self.parms["P2"]
-        self.R1 = self.parms["R1"]
-        self.R2 = self.parms["R2"]
+        self._set_path(self.K1, self.parms["K1"])
+        self._set_path(self.K2, self.parms["K2"])
+        self._set_path(self.d1, self.parms["d1"])
+        self._set_path(self.d2, self.parms["d2"])
+        self._set_path(self.R, self.parms["R"])
+        self._set_path(self.t, self.parms["t"])
+        self._set_path(self.P1, self.parms["P1"])
+        self._set_path(self.P2, self.parms["P2"])
+        self._set_path(self.R1, self.parms["R1"])
+        self._set_path(self.R2, self.parms["R2"])
+
+    def _set_path(self, val, paramater):
+        if val[-1] == '/':
+            val = paramater
+        else:
+            val = self.base_path + paramater
 
 
 class Paramters:
