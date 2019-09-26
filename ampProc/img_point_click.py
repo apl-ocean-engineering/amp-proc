@@ -3,6 +3,10 @@
 """
 @author: Mitchell Scott
 @contact: miscott@uw.edu
+
+PointClick object to help with point-and-click image point getting for 2 Manta
+images. Helper functions will return corresponding image points
+(assuming in-order clicking)
 """
 
 import sys

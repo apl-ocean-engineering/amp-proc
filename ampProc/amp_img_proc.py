@@ -4,6 +4,8 @@
 @author: Mitchell Scott
 @contact: miscott@uw.edu
 """
+
+#TODO much of this is depreciated
 import glob
 import os
 import sys
