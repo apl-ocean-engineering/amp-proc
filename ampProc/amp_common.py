@@ -47,13 +47,27 @@ class CvSquare:
         """
         Move square in forward horizontal direction by motion (default 1)
         """
-        if (self.upper_x < self.img_size[0]):
-            self.lower_x += motion
-            self.upper_x += motion
-            #print(self.upper_x)
-            return True
+        if motion > 0:
+            if (self.upper_x < self.img_size[0]):
+                self.lower_x += motion
+                self.upper_x += motion
+                return True
+        elif motion < 0:
+            if (self.upper_x > 0):
+                self.lower_x += motion
+                self.upper_x += motion
+                return True
 
         return False
+
+    def extend_square(self, x_extend, y_extend):
+        """
+        Increase a square by (x,y) in both directions
+        """
+        self.lower_x = max(0, self.lower_x - x_extend)
+        self.lower_y = max(0, self.lower_y - y_extend)
+        self.upper_x = min(self.img_size[0], self.upper_x + x_extend)
+        self.upper_y = min(self.img_size[1], self.upper_y + y_extend)
 
 
 class ampCommon:
