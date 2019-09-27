@@ -10,7 +10,7 @@ from pytorchYolo.argLoader import ArgLoader
 from ampProc.amp_common import ampCommon, CvSquare
 from ampProc.amp_img_proc import BasePath
 import cv2
-
+import datetime
 import glob
 import yaml
 from os.path import dirname, abspath
@@ -21,6 +21,10 @@ import copy
 import time
 import signal
 
+
+start_date = '/media/WAMP/2019_01_07'  # Set null string (' ') to search over full space
+# example: start_date = '/media/WAMP/2018_11_17'
+
 x_motion = 1
 
 name1 = "img1"
@@ -29,7 +33,7 @@ name2 = "img2"
 # cv2.namedWindow(name1, cv2.WINDOW_NORMAL)
 # cv2.namedWindow(name2, cv2.WINDOW_NORMAL)
 
-overlap_threshold = 0.4
+overlap_threshold = 0.2
 
 min_det_objs = 6
 min_shared_objs = 6
@@ -168,6 +172,10 @@ def check_stereo_detection(squares1, squares2, img1=None, img2=None,
 
 def load_undistort_rectify_image(fname, K1, d1, map1, map2):
     img = cv2.imread(fname)
+    if img is None:
+        return None, None
+    if img.shape[0] < 60:
+        return None, None
     raw_img = copy.deepcopy(img)
 
     # undistort images
@@ -196,6 +204,24 @@ def detection(detection1, detection2, squares1, squares2, img1, img2):
             return True
 
 
+def beyond_date(date, start_date):
+    if start_date == ' ':
+        return True
+    else:
+        year = int(date.split('_')[0])
+        month = int(date.split('_')[1])
+        day = int(date.split('_')[2])
+        date1 = datetime.date(year=year, month=month, day=day)
+        start_date = start_date.split("/")[3]
+        start_yr = int(start_date.split('_')[0])
+        start_month = int(start_date.split('_')[1])
+        start_day = int(start_date.split('_')[2])
+        date2 = datetime.date(year=start_yr, month=start_month, day=start_day)
+        if time.mktime(date1.timetuple()) > time.mktime(date2.timetuple()):
+            return True
+        return False
+
+
 def main(args, detector):
     save_path = args.save_path
     if save_path[-1] != "/":
@@ -208,85 +234,100 @@ def main(args, detector):
     loader.load_params_from_file(calibration_loader)
 
     base_directory = args.images
-    sub_directories = glob.glob(base_directory + '*/')
+    sub_directories = sorted(glob.glob(base_directory + '*/'))
     count = 0
-    try:
-        for _dir in sub_directories:
-            bp = BasePath(_dir)
-            for folder in bp.sub_directories:
-                manta1 = sorted(glob.glob(folder + "Manta 1/*.jpg"))
-                manta2 = sorted(glob.glob(folder + "Manta 2/*.jpg"))
+    # try:
+    for _dir in sub_directories:
+        date = _dir.split("/")[3]
+        # Ignore folders that aren't of specific dates
+        if date[0:2] == '20':
+            beyond = beyond_date(date, start_date)
+            if beyond:
+                bp = BasePath(_dir)
+                for folder in bp.sub_directories:
 
-                images = []
-                for fname1, fname2 in zip(manta1, manta2):
-                    images.append((fname1, fname2))
-                ac = ampCommon()
-                ac.display = False
+                    manta1 = sorted(glob.glob(folder + "Manta 1/*.jpg"))
+                    manta2 = sorted(glob.glob(folder + "Manta 2/*.jpg"))
 
-                im_size = (2464, 2056)
-                EI_loader = ExtrinsicIntrnsicLoaderSaver(loader, im_size)
+                    images = []
+                    for fname1, fname2 in zip(manta1, manta2):
+                        images.append((fname1, fname2))
+                    ac = ampCommon()
+                    ac.display = False
 
-                # Get rectification maps
-                if EI_loader.paramaters.R1 is None or EI_loader.paramaters.R1 is None:
-                    EI_loader.calculate_rectification_matracies()
+                    im_size = (2464, 2056)
+                    EI_loader = ExtrinsicIntrnsicLoaderSaver(loader, im_size)
 
-                # Load rectification maps
-                map1_1, map1_2 = cv2.initUndistortRectifyMap(
-                        EI_loader.paramaters.K1, EI_loader.paramaters.d1,
-                        EI_loader.paramaters.R1, EI_loader.paramaters.P1[0:3, 0:3],
-                        im_size, cv2.CV_32FC1)
+                    # Get rectification maps
+                    if EI_loader.paramaters.R1 is None or EI_loader.paramaters.R1 is None:
 
-                map2_1, map2_2 = cv2.initUndistortRectifyMap(
-                        EI_loader.paramaters.K2, EI_loader.paramaters.d2,
-                        EI_loader.paramaters.R2, EI_loader.paramaters.P2[0:3, 0:3],
-                        im_size, cv2.CV_32FC1)
+                        EI_loader.calculate_rectification_matracies()
 
+                    # Load rectification maps
+                    map1_1, map1_2 = cv2.initUndistortRectifyMap(
+                            EI_loader.paramaters.K1, EI_loader.paramaters.d1,
+                            EI_loader.paramaters.R1,
+                            EI_loader.paramaters.P1[0:3, 0:3], im_size,
+                            cv2.CV_32FC1)
 
+                    map2_1, map2_2 = cv2.initUndistortRectifyMap(
+                            EI_loader.paramaters.K2, EI_loader.paramaters.d2,
+                            EI_loader.paramaters.R2,
+                            EI_loader.paramaters.P2[0:3, 0:3], im_size,
+                            cv2.CV_32FC1)
+                    for i in range(len(images)):
 
-                for i in range(len(images)):
-                    count += 1
-                    last_visted = open(save_path + "last_visted.txt", "a+")
-                    last_visted.write(str(count) + '\n')
-                    last_visted.close()
+                        count += 1
 
-                    signal.signal(signal.SIGINT, sigint_handler)
+                        signal.signal(signal.SIGINT, sigint_handler)
 
-                    frame1, frame2 = ac.find_date(images, i)
-                    if frame1 is not None and frame2 is not None:
-                        img1, raw_img1 = load_undistort_rectify_image(
-                            frame1, EI_loader.paramaters.K1, EI_loader.paramaters.d1,
-                            map1_1, map1_2)
+                        frame1, frame2 = ac.find_date(images, i)
+                        print(folder)
+                        if frame1 is not None and frame2 is not None:
+                            last_visted = open(
+                                save_path + "last_visted.txt", "a+")
+                            last_visted.write(
+                              str(count) + "," + folder + "," + frame1 + '\n')
+                            last_visted.close()
+                            img1, raw_img1 = load_undistort_rectify_image(
+                                frame1, EI_loader.paramaters.K1,
+                                EI_loader.paramaters.d1,
+                                map1_1, map1_2)
 
-                        img2, raw_img2 = load_undistort_rectify_image(
-                            frame2, EI_loader.paramaters.K2, EI_loader.paramaters.d2,
-                            map2_1, map2_2)
+                            img2, raw_img2 = load_undistort_rectify_image(
+                                frame2, EI_loader.paramaters.K2,
+                                EI_loader.paramaters.d2,
+                                map2_1, map2_2)
 
-                        if img1 is None or img2 is None:
-                            continue
+                            if img1 is None or img2 is None:
+                                continue
 
-                        # draw_images(raw_img1, raw_img2, wait=1)
-
-                        detection1, squares1 = get_detection_squares(
-                                detector, img1, frame1.split('/')[-1],
-                                display_name_append="1")
-
-                        detection2, squares2 = get_detection_squares(
-                                detector, img2, frame2.split('/')[-1],
-                                display_name_append="2")
-
-                        obj_found = detection(
-                            detection1, detection2, squares1, squares2, img1, img2)
-
-                        if obj_found:
-                            detection_file = open(save_path + "detection.txt", "a+")
-                            write_line = str(count) + "," + frame1 + "," + frame2 + '\n'
-                            detection_file.write(write_line)
-                            detection_file.close()
-                        else:
-                            pass
                             # draw_images(raw_img1, raw_img2, wait=1)
-    except:
-        pass
+
+                            detection1, squares1 = get_detection_squares(
+                                    detector, img1, frame1.split('/')[-1],
+                                    display_name_append="1")
+
+                            detection2, squares2 = get_detection_squares(
+                                    detector, img2, frame2.split('/')[-1],
+                                    display_name_append="2")
+
+                            obj_found = detection(
+                                detection1, detection2, squares1, squares2,
+                                img1, img2)
+
+                            if obj_found:
+                                detection_file = open(
+                                    save_path + "detection.txt", "a+")
+                                write_line = str(count) + "," + frame1 + \
+                                      "," + frame2 + '\n'
+                                detection_file.write(write_line)
+                                detection_file.close()
+                            else:
+                                pass
+                                # draw_images(raw_img1, raw_img2, wait=1)
+    # except:
+        # pass
 
 
 if __name__ == '__main__':
