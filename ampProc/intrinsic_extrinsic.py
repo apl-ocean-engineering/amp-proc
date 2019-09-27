@@ -70,10 +70,11 @@ class Loader:
         self._set_path(self.R2, self.parms["R2"])
 
     def _set_path(self, val, paramater):
+        val[0] = paramater[0]
         if val[-1] == '/':
-            val = paramater
+            val[1] = paramater[1]
         else:
-            val = self.base_path + paramater
+            val[1] = self.base_path + paramater[1]
 
 
 class Paramters:
@@ -159,31 +160,32 @@ class ExtrinsicIntrnsicLoaderSaver:
         """
         if paramLoader.K1[0]:
             self.paramaters.K1 = np.float64(np.loadtxt(
-                paramLoader.base_path + paramLoader.K1[1], delimiter=','))
+                paramLoader.K1[1], delimiter=','))
+            print(self.paramaters.K1)
         if paramLoader.K2[0]:
             self.paramaters.K2 = np.float64(np.loadtxt(
-                paramLoader.base_path + paramLoader.K2[1], delimiter=','))
+                paramLoader.K2[1], delimiter=','))
         if paramLoader.d1[0]:
             self.paramaters.d1 = np.float64(np.loadtxt(
-                paramLoader.base_path + paramLoader.d1[1], delimiter=','))
+                paramLoader.d1[1], delimiter=','))
         if paramLoader.d2[0]:
             self.paramaters.d2 = np.float64(np.loadtxt(
-                paramLoader.base_path + paramLoader.d2[1], delimiter=','))
+                paramLoader.d2[1], delimiter=','))
         if paramLoader.R[0]:
             self.paramaters.R = np.float64(np.loadtxt(
-                paramLoader.base_path + paramLoader.R[1], delimiter=','))
+                paramLoader.R[1], delimiter=','))
         if paramLoader.t[0]:
             self.paramaters.t = np.float64(np.loadtxt(
-                paramLoader.base_path + paramLoader.t[1], delimiter=','))
+                paramLoader.t[1], delimiter=','))
         if paramLoader.P1[0]:
             self.paramaters.P1 = np.float64(np.loadtxt(
-                paramLoader.base_path + paramLoader.P1[1], delimiter=','))
+                paramLoader.P1[1], delimiter=','))
         if paramLoader.P2[0]:
             self.paramaters.P2 = np.float64(np.loadtxt(
-                paramLoader.base_path + paramLoader.P2[1], delimiter=','))
+                paramLoader.P2[1], delimiter=','))
         if paramLoader.R1[0]:
             self.paramaters.R1 = np.float64(np.loadtxt(
-                paramLoader.base_path + paramLoader.R1[1], delimiter=','))
+                paramLoader.R1[1], delimiter=','))
         if paramLoader.R2[0]:
             self.paramaters.R2 = np.float64(np.loadtxt(
-                paramLoader.base_path + paramLoader.R2[1], delimiter=','))
+                paramLoader.R2[1], delimiter=','))
