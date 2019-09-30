@@ -12,7 +12,7 @@ from ampProc.amp_img_proc import BasePath
 import cv2
 import datetime
 import glob
-import yaml
+
 from os.path import dirname, abspath
 from calibrationLoader.intrinsic_extrinsic import Loader, ExtrinsicIntrnsicLoaderSaver
 import sys
@@ -227,11 +227,8 @@ def main(args, detector):
     if save_path[-1] != "/":
         save_path += "/"
 
-    with open(args.calibration_yaml, 'r') as stream:
-        calibration_loader = yaml.safe_load(stream)
-
     loader = Loader(args.base_path)
-    loader.load_params_from_file(calibration_loader)
+    loader.load_params_from_file(args.calibration_yaml)
 
     base_directory = args.images
     sub_directories = sorted(glob.glob(base_directory + '*/'))
@@ -302,7 +299,7 @@ def main(args, detector):
                             if img1 is None or img2 is None:
                                 continue
 
-                            # draw_images(raw_img1, raw_img2, wait=1)
+                            draw_images(raw_img1, raw_img2, wait=1)
 
                             detection1, squares1 = get_detection_squares(
                                     detector, img1, frame1.split('/')[-1],
@@ -317,6 +314,7 @@ def main(args, detector):
                                 img1, img2)
 
                             if obj_found:
+                                cv2.waitKey(0)
                                 detection_file = open(
                                     save_path + "detection.txt", "a+")
                                 write_line = str(count) + "," + frame1 + \
@@ -344,7 +342,7 @@ if __name__ == '__main__':
             __file__))) + "/data")
     argLoader.parser.add_argument(
         "--base_path", help="Base folder to calibration values",
-        default=dirname(dirname(abspath(__file__))) + "/calibration")
+        default=dirname(dirname(abspath(__file__))) + "/calibration/")
 
     args = argLoader.args  # parse the command line arguments
     pause = 0.01
