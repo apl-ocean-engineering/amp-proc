@@ -299,7 +299,7 @@ def main(args, detector):
                             if img1 is None or img2 is None:
                                 continue
 
-                            draw_images(raw_img1, raw_img2, wait=1)
+                            # draw_images(raw_img1, raw_img2, wait=1)
 
                             detection1, squares1 = get_detection_squares(
                                     detector, img1, frame1.split('/')[-1],
@@ -314,7 +314,6 @@ def main(args, detector):
                                 img1, img2)
 
                             if obj_found:
-                                cv2.waitKey(0)
                                 detection_file = open(
                                     save_path + "detection.txt", "a+")
                                 write_line = str(count) + "," + frame1 + \
