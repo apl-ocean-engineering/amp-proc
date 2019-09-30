@@ -14,7 +14,7 @@ import datetime
 import glob
 import yaml
 from os.path import dirname, abspath
-from ampProc.intrinsic_extrinsic import Loader, ExtrinsicIntrnsicLoaderSaver
+from calibrationLoader.intrinsic_extrinsic import Loader, ExtrinsicIntrnsicLoaderSaver
 import sys
 from shapely.geometry import Polygon
 import copy
@@ -22,7 +22,7 @@ import time
 import signal
 
 
-start_date = '/media/WAMP/2019_01_07'  # Set null string (' ') to search over full space
+start_date = '/media/WAMP/2019_01_08'  # Set null string (' ') to search over full space
 # example: start_date = '/media/WAMP/2018_11_17'
 
 x_motion = 1

@@ -12,7 +12,7 @@ import copy
 
 import sys
 from os.path import dirname, abspath
-from ampProc.intrinsic_extrinsic import Loader, ExtrinsicIntrnsicLoaderSaver
+from calibrationLoader.intrinsic_extrinsic import Loader, ExtrinsicIntrnsicLoaderSaver
 from ampProc.point_identification3 import PointIdentification3D
 
 
