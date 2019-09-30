@@ -17,7 +17,7 @@ class image_republish:
         self.image_sub = rospy.Subscriber("/image_raw",
                                         Image, self.image_callback, 0)
         self.image_sub = rospy.Subscriber("/image_raw",
-                                        Image, self.image_callback,1 )
+                                        Image, self.image_callback, 1)
 
         self.img = Image()
         self.bridge = CvBridge()

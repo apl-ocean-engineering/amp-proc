@@ -5,7 +5,8 @@ Contains processing code for AMP image processing
 Python3  
 Opencv  
 Pytorch  
-Apl-OE pytorchYolo (https://github.com/apl-ocean-engineering/pytorchYolo)  
+[Apl-OE pytorchYolo](https://github.com/apl-ocean-engineering/pytorchYolo)  
+[calibrationLoader](https://github.com/apl-ocean-engineering/calibration-loader)
 
 ## Instalation
 $ git clone https://github.com/apl-ocean-engineering/amp-proc  
