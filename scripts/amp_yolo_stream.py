@@ -230,7 +230,7 @@ def main(args, detector):
     with open(args.calibration_yaml, 'r') as stream:
         calibration_loader = yaml.safe_load(stream)
 
-    loader = Loader()
+    loader = Loader(args.base_path)
     loader.load_params_from_file(calibration_loader)
 
     base_directory = args.images
@@ -342,6 +342,10 @@ if __name__ == '__main__':
         help="Path to save positive detections",
         default=dirname(dirname(abspath(
             __file__))) + "/data")
+    argLoader.parser.add_argument(
+        "--base_path", help="Base folder to calibration values",
+        default=dirname(dirname(abspath(__file__))) + "/calibration")
+
     args = argLoader.args  # parse the command line arguments
     pause = 0.01
 

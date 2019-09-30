@@ -1,4 +1,4 @@
-base_path: /home/mitchell/WAMP_WS2/AMP-proc/calibration/
+Info: "Set '/' to specify full path, or no '/' but add 'Base path' to Loader class for relative path"
 
 K1: [True, camera1/intrinsic_matrix.csv]
 K2: [True, camera2/intrinsic_matrix.csv]
