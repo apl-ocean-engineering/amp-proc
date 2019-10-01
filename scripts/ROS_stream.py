@@ -4,7 +4,7 @@ import cv2
 import glob
 import yaml
 from os.path import dirname, abspath
-from calibrationLoader.intrinsic_extrinsic import Loader, ExtrinsicIntrnsicLoaderSaver
+from stereoProcessing.intrinsic_extrinsic import Loader, ExtrinsicIntrnsicLoaderSaver
 import argparse
 import rospy
 from sensor_msgs.msg import CameraInfo, Image

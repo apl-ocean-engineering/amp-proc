@@ -14,7 +14,7 @@ import datetime
 import glob
 
 from os.path import dirname, abspath
-from calibrationLoader.intrinsic_extrinsic import Loader, ExtrinsicIntrnsicLoaderSaver
+from stereoProcessing.intrinsic_extrinsic import Loader, ExtrinsicIntrnsicLoaderSaver
 import sys
 from shapely.geometry import Polygon
 import copy

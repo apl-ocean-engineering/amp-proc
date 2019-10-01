@@ -12,8 +12,8 @@ import copy
 
 import sys
 from os.path import dirname, abspath
-from calibrationLoader.intrinsic_extrinsic import Loader, ExtrinsicIntrnsicLoaderSaver
-from ampProc.point_identification3 import PointIdentification3D
+from stereoProcessing.intrinsic_extrinsic import Loader, ExtrinsicIntrnsicLoaderSaver
+from stereoProcessing.point_identification3 import PointIdentification3D
 
 
 def calculate_norm_distance(distance):
@@ -50,21 +50,22 @@ def main():
     parser.add_argument("--calibration_yaml",
         help="Path to calibration yaml specify path of calibration files",
         default=dirname(dirname(abspath(__file__))) + "/cfg/calibrationConfig.yaml")
+    parser.add_argument("--base_path",
+        help="Path to calibration yaml specify path of calibration files",
+        default=dirname(dirname(abspath(__file__))) + "/calibration/")
 
     args = parser.parse_args()
 
     img_path = args.image_path
     fname1 = img_path + args.img1
     fname2 = img_path + args.img2
+    print(fname1)
 
     img1 = cv2.imread(fname1)
     img2 = cv2.imread(fname2)
 
-    with open(args.calibration_yaml, 'r') as stream:
-        calibration_loader = yaml.safe_load(stream)
-
-    loader = Loader()
-    loader.load_params_from_file(calibration_loader)
+    loader = Loader(base_path = args.base_path)
+    loader.load_params_from_file(args.calibration_yaml)
 
     print("Click on corresponding points in both images to estimate length")
     EI_loader = ExtrinsicIntrnsicLoaderSaver(loader, img1.shape[:2])

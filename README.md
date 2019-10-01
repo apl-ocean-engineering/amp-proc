@@ -6,7 +6,7 @@ Python3
 Opencv  
 Pytorch  
 [Apl-OE pytorchYolo](https://github.com/apl-ocean-engineering/pytorchYolo)  
-[calibrationLoader](https://github.com/apl-ocean-engineering/calibration-loader)
+[stereo-processing](https://github.com/apl-ocean-engineering/stereo-processing)
 
 ## Instalation
 $ git clone https://github.com/apl-ocean-engineering/amp-proc  
