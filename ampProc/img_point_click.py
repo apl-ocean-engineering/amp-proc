@@ -14,8 +14,7 @@ import sys
 import cv2
 import numpy as np
 
-from constans import Constants
-
+from constants import Constants
 
 
 class PointClick(object):
@@ -45,9 +44,8 @@ class PointClick(object):
         self.image1 = np.zeros([0, 0])
         self.image2 = np.zeros([0, 0])
 
-        self.img1 = np.zeros((3,3))
-        self.img2 = np.zeros((3,3))
-
+        self.img1 = np.zeros((3, 3))
+        self.img2 = np.zeros((3, 3))
 
         cv2.namedWindow(Constants.img1_name, cv2.WINDOW_NORMAL)
         cv2.namedWindow(Constants.img2_name, cv2.WINDOW_NORMAL)
