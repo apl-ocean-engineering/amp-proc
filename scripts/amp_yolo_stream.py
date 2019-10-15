@@ -253,7 +253,7 @@ def main(args, detector):
                     ac.display = False
 
                     im_size = (2464, 2056)
-                    EI_loader = ExtrinsicIntrnsicLoaderSaver(loader, im_size)
+                    EI_loader = ExtrinsicIntrnsicLoaderSaver(loader)
 
                     # Get rectification maps
                     if EI_loader.paramaters.R1 is None or EI_loader.paramaters.R1 is None:
@@ -279,7 +279,6 @@ def main(args, detector):
                         signal.signal(signal.SIGINT, sigint_handler)
 
                         frame1, frame2 = ac.find_date(images, i)
-                        print(folder)
                         if frame1 is not None and frame2 is not None:
                             last_visted = open(
                                 save_path + "last_visted.txt", "a+")

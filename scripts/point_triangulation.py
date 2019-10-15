@@ -5,7 +5,6 @@
 @contact: miscott@uw.edu
 """
 import argparse
-import yaml
 import cv2
 import numpy as np
 import copy
@@ -64,7 +63,7 @@ def main():
     img1 = cv2.imread(fname1)
     img2 = cv2.imread(fname2)
 
-    loader = Loader(base_path = args.base_path)
+    loader = Loader(base_path=args.base_path)
     loader.load_params_from_file(args.calibration_yaml)
 
     print("Click on corresponding points in both images to estimate length")
