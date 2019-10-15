@@ -6,6 +6,8 @@ import time
 import argparse
 from os.path import dirname, abspath
 from ampProc.image_stream import ImageStream
+from ampProc.constans import Constants
+
 
 
 def remove_line(write_file_name, img_file):
@@ -20,8 +22,8 @@ def remove_line(write_file_name, img_file):
 
 
 def main():
-    cv2.namedWindow("frame1", cv2.WINDOW_NORMAL)
-    cv2.namedWindow("frame2", cv2.WINDOW_NORMAL)
+    cv2.namedWindow(Constants.img1_name, cv2.WINDOW_NORMAL)
+    cv2.namedWindow(Constants.img2_name, cv2.WINDOW_NORMAL)
 
 
     parser = argparse.ArgumentParser("Stream detected events")
@@ -72,68 +74,21 @@ def main():
 
     waitTime = 50
     IS = ImageStream(args.interesting_event_name, wait_time=waitTime)
+    # BB = BoundingBoxes()
     while img_num < len(lines):
         img_file = lines[img_num]
-        img_name1 = img_file.split(',')[-2]
-        img_name2 = img_file.split(',')[-1].rstrip()
-        img1 = cv2.imread(img_name1)
-        img2 = cv2.imread(img_name2)
-        img_num = IS.stream_images(img1, img2, img_num)
+        img_name = img_file.split(',')[-1].rstrip()
+        img = cv2.imread(img_name)
+        label = img_name.replace("image", "label").replace(".jpg", ".txt")
+        # BB.display_labels(img, label)
 
-        # if k == 112:  # p
-        #     print("PAUSING")
-        #     self.wait_time = 0
-        #     # return img_num
-        #
-        # if k == 99:  # c
-        #     print("CONTINUING")
-        #     self.wait_time = 50
-        #     # return img_num
-        #
-        # if k == 110:  # n
-        #     print("NEXT IMAGE")
-        #     img_num += 1
-        #     # return img_num
-        #
-        # if k == 117:  # u
-        #     print("UNUSRE")
-        #     unsure_write_file = open(
-        #         interesting_event_name.replace('true', 'unsure'), 'a+')
-        #     unsure_write_file.write(img_file.split(',')[-1])
-        #     unsure_write_file.close()
-        #
-        # elif k == 102:  # f
-        #     print('FALSE CLASSIFICATION')
-        #     ''' False '''
-        #     if os.path.exists(write_file_name):
-        #         remove_line(write_file_name, img_file.split(',')[-1])
-        #
-        # elif k == 98:  # b
-        #     print('GOING BACKWARDS')
-        #     '''
-        #     GO BACK
-        #     '''
-        #     img_num -= 1
-        #     # return img_num
-        #
-        # elif k == 113:  # q
-        #     print('EXITING')
-        #     ''' Exit '''
-        #     exit()
-        #
-        # elif k == 13:  # Enter
-        #     print('INTERESTING EVENT')
-        #     ''' TRUE '''
-        #     interesting_even_file = open(write_file_name, 'a+')
-        #     interesting_even_file.write(
-        #     img_file.split(',')[-2] + "," + img_file.split(',')[-1])
-        #     interesting_even_file.close()
+        img_num = IS.display_labels(img, label, img_num)
+
+        print(label)
 
         save_img_file = open(args.last_image_save_file, 'a+')
         save_img_file.write(str(img_num) + '\n')
         save_img_file.close()
-
-
 
 
 if __name__ == '__main__':
