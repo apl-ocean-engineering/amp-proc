@@ -67,7 +67,7 @@ def main():
     loader.load_params_from_file(args.calibration_yaml)
 
     print("Click on corresponding points in both images to estimate length")
-    EI_loader = ExtrinsicIntrnsicLoaderSaver(loader, img1.shape[:2])
+    EI_loader = ExtrinsicIntrnsicLoaderSaver(loader)
     PI = PointIdentification3D(EI_loader)
     points4D = PI.get_points(copy.copy(img1), copy.copy(img2))
     print("4D points: ", points4D)

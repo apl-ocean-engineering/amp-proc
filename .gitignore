@@ -3,3 +3,6 @@ scripts/*pyc
 ampProc/*pyc
 ampProc/__pycache__/
 data/
+scripts/data/
+scripts/size_speed_test/
+

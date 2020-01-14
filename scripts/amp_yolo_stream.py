@@ -22,16 +22,17 @@ import time
 import signal
 
 
-start_date = '/media/WAMP/2019_01_08'  # Set null string (' ') to search over full space
+#start_date = '/media/WAMP/2019_01_08'  # Set null string (' ') to search over full space
 # example: start_date = '/media/WAMP/2018_11_17'
+start_date = ' '
 
 x_motion = 1
 
-name1 = "img1"
-name2 = "img2"
+name1 = "frame1"
+name2 = "frame2"
 
-# cv2.namedWindow(name1, cv2.WINDOW_NORMAL)
-# cv2.namedWindow(name2, cv2.WINDOW_NORMAL)
+cv2.namedWindow(name1, cv2.WINDOW_NORMAL)
+cv2.namedWindow(name2, cv2.WINDOW_NORMAL)
 
 overlap_threshold = 0.2
 
@@ -41,6 +42,7 @@ min_shared_objs = 6
 sq_x_extend = 0
 sq_y_extend = 50
 
+img_count = 0
 
 def sigint_handler(signum, frame):
     """
@@ -59,14 +61,20 @@ def draw_images(img1, img2, name1=name1, name2=name2, wait=0):
     cv2.imshow(name2, img2)
 
     k = cv2.waitKey(wait)
+    # if k == 13:
+    #     global img_count
+    #     img_count += 1
+    #     cv2.imwrite("img1" + str(img_count) +".png", img1)
+    #     cv2.imwrite("img2" + str(img_count) +".png", img2)
     parse_waitKey(k)
 
 
 def test_square_overlap(sq2, square1_list, img1=None, img2=None):
-    # draw_circles(img1, sq2, color=(0,0,255))
+    #draw_circles(img1, sq2, color=(255,0,255))
+    #draw_images(img1, img2, wait=1)
     for sq1 in square1_list:
-        # draw_circles(img1, sq1)
-        # draw_images(img1, img2, wait=1)
+        #draw_circles(img1, sq1)
+        #draw_images(img1, img2, wait=1)
         p1 = construct_polygon(sq1)
         p2 = construct_polygon(sq2)
 
@@ -119,7 +127,6 @@ def get_detection_squares(detector, img, frame, display_name_append="1"):
     detection, yolo_squares = detector.stream_img(
                     img, frame.split('/')[-1],
                     display_name_append=display_name_append)
-
     squares = build_squares(img.shape[0:2], yolo_squares)
 
     return detection, squares
@@ -130,10 +137,16 @@ def check_stereo_detection(squares1, squares2, img1=None, img2=None,
     for sq2 in squares2:
         time_init = time.time()
         sq2_init = copy.deepcopy(sq2)
-        # draw_circles(img2, sq2)
+        draw_circles(img2, sq2)
+
+        #draw_images(img1, img2)
         # Search forward
         valid = sq2.move_square(motion=1)
         while valid:
+            #draw_circles(img1, sq2)
+            #draw_images(img1, img2, wait=1)
+
+            draw_circles(img1, sq2_init)
             overlap, sq1 = test_square_overlap(
                     sq2, squares1,
                     img1=img1, img2=img2)
@@ -142,7 +155,7 @@ def check_stereo_detection(squares1, squares2, img1=None, img2=None,
                     if args is not None:
                         draw_circles(img1, sq1)
                         draw_circles(img2, sq2_init)
-                        draw_images(img1, img2, wait=0)
+                        #draw_images(img1, img2, wait=0)
                     else:
                         print("NO ARGS PASSED")
                 return True
@@ -195,13 +208,19 @@ def detection(detection1, detection2, squares1, squares2, img1, img2):
     if detection1 and detection2:
         if len(squares1) > min_shared_objs and len(squares2) > min_shared_objs:
             return True
+        #cv2.imshow("img1", img1)
+        #k = cv2.waitKey(0)
+        k = 13
+        if k == 13:
+            stereo_detection = check_stereo_detection(
+                squares1, squares2, img1=img1, img2=img2,
+                show_YOLO=True, args=args)
 
-        stereo_detection = check_stereo_detection(
-            squares1, squares2, img1=img1, img2=img2,
-            show_YOLO=False, args=args)
 
-        if stereo_detection:
-            return True
+            if stereo_detection:
+                return True
+        else:
+            False
 
 
 def beyond_date(date, start_date):
@@ -223,6 +242,8 @@ def beyond_date(date, start_date):
 
 
 def main(args, detector):
+    ac = ampCommon()
+
     save_path = args.save_path
     if save_path[-1] != "/":
         save_path += "/"
@@ -232,24 +253,28 @@ def main(args, detector):
 
     base_directory = args.images
     sub_directories = sorted(glob.glob(base_directory + '*/'))
+
     count = 0
     # try:
     for _dir in sub_directories:
-        date = _dir.split("/")[3]
+        date = _dir.split("/")[-2]
+        print('date', date)
+        print('dir', _dir)
         # Ignore folders that aren't of specific dates
         if date[0:2] == '20':
-            beyond = beyond_date(date, start_date)
+            beyond = ac.beyond_date(date, start_date)
             if beyond:
                 bp = BasePath(_dir)
                 for folder in bp.sub_directories:
-
+                    global img_count
+                    print(count, folder)
                     manta1 = sorted(glob.glob(folder + "Manta 1/*.jpg"))
                     manta2 = sorted(glob.glob(folder + "Manta 2/*.jpg"))
 
                     images = []
                     for fname1, fname2 in zip(manta1, manta2):
                         images.append((fname1, fname2))
-                    ac = ampCommon()
+
                     ac.display = False
 
                     im_size = (2464, 2056)
@@ -273,6 +298,7 @@ def main(args, detector):
                             EI_loader.paramaters.P2[0:3, 0:3], im_size,
                             cv2.CV_32FC1)
                     for i in range(len(images)):
+                        time_init = time.time()
 
                         count += 1
 
@@ -280,10 +306,11 @@ def main(args, detector):
 
                         frame1, frame2 = ac.find_date(images, i)
                         if frame1 is not None and frame2 is not None:
+                            print(frame1.split('/')[-1], frame2.split('/')[-1])
                             last_visted = open(
-                                save_path + "last_visted.txt", "a+")
+                                 save_path + "last_visted.txt", "a+")
                             last_visted.write(
-                              str(count) + "," + folder + "," + frame1 + '\n')
+                               str(count) + "," + folder + "," + frame1 + '\n')
                             last_visted.close()
                             img1, raw_img1 = load_undistort_rectify_image(
                                 frame1, EI_loader.paramaters.K1,
@@ -298,7 +325,7 @@ def main(args, detector):
                             if img1 is None or img2 is None:
                                 continue
 
-                            # draw_images(raw_img1, raw_img2, wait=1)
+                            #draw_images(raw_img1, raw_img2, wait=1)
 
                             detection1, squares1 = get_detection_squares(
                                     detector, img1, frame1.split('/')[-1],
@@ -322,6 +349,7 @@ def main(args, detector):
                             else:
                                 pass
                                 # draw_images(raw_img1, raw_img2, wait=1)
+                            print("total time elapsed", time.time() - time_init)
     # except:
         # pass
 
@@ -337,7 +365,7 @@ if __name__ == '__main__':
         "--save_path",
         help="Path to save positive detections",
         default=dirname(dirname(abspath(
-            __file__))) + "/data")
+            __file__))) + "/WETS_stereo_data_review")
     argLoader.parser.add_argument(
         "--base_path", help="Base folder to calibration values",
         default=dirname(dirname(abspath(__file__))) + "/calibration/")
