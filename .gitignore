@@ -6,4 +6,5 @@ data/
 scripts/data/
 scripts/size_speed_test/
 scripts/*.avi
-
+WAMP_acoustic_review/
+WETS_stereo_data_review/
