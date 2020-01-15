@@ -31,7 +31,7 @@ class TemporalDetectionSquaresCorrespondance:
     AREA_WEIGHT = 1.0
     TRAVEL_WEIGHT = 1.0/100
 
-    MAX_TRAVEL_DIST = 300
+    MAX_TRAVEL_DIST = 800
 
     def __init__(self, fname, SP):
         self.fname = fname
@@ -227,7 +227,7 @@ def run_folders(args, detector):
 
             beyond = ac.beyond_date(date, start_date)
             if beyond:
-                data['date'] = date
+
                 bp = BasePath(_dir)
                 for folder in bp.sub_directories:
                     global img_count
@@ -246,6 +246,7 @@ def run_folders(args, detector):
                         signal.signal(signal.SIGINT, sigint_handler)
                         fname1, fname2 = ac.find_date(images, i)
                         if fname1 is not None and fname2 is not None:
+                            #data['date'] = {'date' : fname1.split("/")[-1]}
                             # time_diff = ac.relative_time_diff(fname1, fname2)
                             time_init = time.time()
                             img1 = cv2.imread(fname1)
@@ -290,7 +291,7 @@ def run_folders(args, detector):
                                             sq1, sq2)
                                         points4dT = np.transpose(points4d)
                                         avg = np.mean(points4dT, axis=0)[:3]
-                                        detection_name = 'detection%s' % (count)
+                                        detection_name = 'detection%s_%s' % (count, square_count)
                                         data[detection_name] = {
                                             'fname1': str(fname1),
                                             'fname2': str(fname2),
