@@ -83,6 +83,41 @@ class CvSquare:
 class ampCommon:
     def __init__(self, time_delay_allowed=0.05):
         self.time_delay_allowed = time_delay_allowed
+        
+    def relative_time_diff(self, f1, f2):
+        """
+        Verify that image timestamps are less than time_delay_allowed apart
+        Inputs:
+            f1(str): Frame1 name
+            f2(str): Frame2 name
+
+        Return:
+            Float: Timestamps differance
+        """
+        minute1 = f1.split('/')[-1].split('_')[-2]
+        minute2 = f2.split('/')[-1].split('_')[-2]
+        hour1 = f1.split('/')[-1].split('_')[-3]
+        hour2 = f2.split('/')[-1].split('_')[-3]
+        #print(hour1, hour2)
+        time1 = float(
+            '.'.join(f1.split('/')[-1].split('_')[-1].split('.')[0:2]))
+        time2 = float(
+            '.'.join(f2.split('/')[-1].split('_')[-1].split('.')[0:2]))
+        diff = time1 - time2
+        hour_adjust = False
+        if hour1 > hour2:
+            diff+=60
+            hour_adjust = True
+        elif hour1 < hour2:
+            hour_adjust = True
+            diff-=60
+        if not hour_adjust:
+            if minute1 > minute2:
+                diff+=60
+            elif minute1 < minute2:
+                diff-=60
+        #print(hour1 < hour2, diff, time1, time2)
+        return diff
 
     def time_diff(self, f1, f2):
         """
@@ -187,7 +222,7 @@ class ampCommon:
 
         return False
 
-    def _beyond_date(self, date, start_date):
+    def beyond_date(self, date, start_date):
         if start_date == ' ':
             return True
         else:

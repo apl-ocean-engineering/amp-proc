@@ -27,8 +27,8 @@ if __name__ == "__main__":
 
     f = open(args.detection_path, 'r')
     for line in f:
-        fname1 = line.split(',')[1]
-        fname2 = line.split(',')[2].rstrip()
+        fname1 = line.split(',')[0]
+        fname2 = line.split(',')[1].rstrip()
         img1 = cv2.imread(fname1)
         img2 = cv2.imread(fname2)
         cv2.imshow(frame_name1, img1)
