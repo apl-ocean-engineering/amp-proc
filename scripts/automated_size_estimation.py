@@ -117,9 +117,11 @@ class TemporalDetectionSquaresCorrespondance:
                 scores.append(-1)
                 continue
             max_area = max(poly_t.area, poly_t1.area)
-            overlap_over_area = 1 - max_area/min(poly_t.area, poly_t1.area)#1 - poly_t.intersection(poly_t1).area / max_area
-
-            scores.append(overlap_over_area)
+            if min(poly_t.area, poly_t1.area) > 0:
+                overlap_over_area = 1 - max_area/min(poly_t.area, poly_t1.area)#1 - poly_t.intersection(poly_t1).area / max_area
+                scores.append(overlap_over_area)
+            else:
+                scores.append(-1)
 
         return scores
         # ind = -1
@@ -149,10 +151,10 @@ def sigint_handler(signum, frame):
 
 
 def order_points(sq1, sq2):
-    points1 = [(sq1.lower_x, sq1.lower_y), (sq1.lower_x, sq1.upper_y),
-               (sq1.upper_x, sq1.upper_y), (sq1.upper_x, sq1.lower_y)]
-    points2 = [(sq2.lower_x, sq2.lower_y), (sq2.lower_x, sq2.upper_y),
-               (sq2.upper_x, sq2.upper_y), (sq2.upper_x, sq2.lower_y)]
+    points1 = [(sq1.lower_x, sq1.lower_y), (sq1.upper_x, sq1.lower_y),
+               (sq1.upper_x, sq1.upper_y), (sq1.lower_x, sq1.upper_y)]
+    points2 = [(sq2.lower_x, sq2.lower_y), (sq2.upper_x, sq2.lower_y),
+               (sq2.upper_x, sq2.upper_y), (sq2.lower_x, sq2.upper_y)]
 
     points1 = np.asarray(
         [(np.float64(val[0]),
@@ -162,14 +164,34 @@ def order_points(sq1, sq2):
             np.float64(val[1])) for val in points2], dtype=np.float64)
 
     return np.transpose(points1), np.transpose(points2)
+    #return points1, points2
 
 
 def find_points(EI_loader, sq1, sq2):
     points1, points2 = order_points(sq1, sq2)
+    #print(points1)
+    #points1 = np.expand_dims(points1, 1)
+    #points2 = np.expand_dims(points2, 1)
+    #print(points1.shape)
+    # points1_ = cv2.undistortPoints(
+    # points1, np.float64(EI_loader.paramaters.K1),
+    # np.float64(EI_loader.paramaters.d1))
+
+    # points1_ = cv2.undistortPoints(
+    #     points1, np.float64(EI_loader.paramaters.K1),
+    #     np.float64(EI_loader.paramaters.d1), R = np.float64(EI_loader.paramaters.R1), P = np.float64(EI_loader.paramaters.P1))
+    # points2_ = cv2.undistortPoints(
+    #     points2, EI_loader.paramaters.K2,
+    #     EI_loader.paramaters.d2, R = EI_loader.paramaters.R2, P = EI_loader.paramaters.P2)
+
+    #print('here')
+    #print(EI_loader.paramaters.P1)
+    #print(EI_loader.paramaters.P2)
 
     points4d = cv2.triangulatePoints(
         EI_loader.paramaters.P1,
         EI_loader.paramaters.P2, points1, points2)
+    #print(points4d)
 
     points4d /= points4d[3]
 
@@ -179,8 +201,9 @@ def find_points(EI_loader, sq1, sq2):
 def run_folders(args, detector):
     save = True
 
-    start_date = ' '
-    ac = ampCommon(time_delay_allowed=0.05)
+    start_date = '/WAMP_workspace/WETS_stereo_images/2018_10_27/2018_10_27 14_24_37'
+    #start_date = ' '
+    ac = ampCommon(time_delay_allowed=0.1)
 
     SP = StereoProcessing(args, detector)
 
@@ -223,15 +246,22 @@ def run_folders(args, detector):
         print('dir', _dir)
 
         data = {}
-        if date[0:2] == '20':
+        pose_filename = "size_speed_test/pose%s_%s.txt" % (date, count)
+        speed_filename = "size_speed_test/speed%s_%s.txt" % (date, count)
 
+        if date[0:2] == '20':
+            f_pose = open(pose_filename, 'a+')
+            s_pose = open(speed_filename, 'a+')
             beyond = ac.beyond_date(date, start_date)
+
             if beyond:
 
                 bp = BasePath(_dir)
-                for folder in bp.sub_directories:
-                    global img_count
 
+                for folder in bp.sub_directories:
+                    # if folder != "/home/mitchell/WAMP_workspace/WETS_stereo_images/2018_10_27/2018_10_27 14_24_37/":
+                    #     continue
+                    global img_count
                     manta1 = sorted(glob.glob(folder + "Manta 1/*.jpg"))
                     manta2 = sorted(glob.glob(folder + "Manta 2/*.jpg"))
 
@@ -251,8 +281,11 @@ def run_folders(args, detector):
                             time_init = time.time()
                             img1 = cv2.imread(fname1)
                             img2 = cv2.imread(fname2.rstrip())
+                            #cv2.imshow("img1", img1)
+                            #cv2.waitKey(0)
 
-                            #
+                            print(fname1)
+
                             img1, raw_img1 = SP.load_undistort_rectify_image(
                                 img1, EI_loader.paramaters.K1,
                                 EI_loader.paramaters.d1,
@@ -262,10 +295,17 @@ def run_folders(args, detector):
                                 img2, EI_loader.paramaters.K2,
                                 EI_loader.paramaters.d2,
                                 map2_1, map2_2)
+
+                            #cv2.imshow("img1_2", img1)
+                            #cv2.waitKey(0)
                             #
                             detections, img1, img2 = SP.find_correspondance(
                                 img1, img2=img2)
                             _img1 = copy.deepcopy(img1)
+
+                            #print(type(img1))
+
+
                             # print("detection time", time.time() - time_init)
 
                             if detections != []:
@@ -283,7 +323,7 @@ def run_folders(args, detector):
                                         square_count +=1
                                         SP.draw_circles(img1, sq1)
                                         SP.draw_circles(img2, sq2)
-                                        #SP.draw_images(img1, img2, wait=0)
+
 
 
 
@@ -291,6 +331,11 @@ def run_folders(args, detector):
                                             sq1, sq2)
                                         points4dT = np.transpose(points4d)
                                         avg = np.mean(points4dT, axis=0)[:3]
+                                        #print(points4dT)
+                                        size = np.linalg.norm(np.subtract(points4dT[0], points4dT[2]))
+                                        pose_line = str(count) + "," + str(square_count) + "," + str(avg[0]) + " " + str(avg[1]) + " " + str(avg[2])
+
+
                                         detection_name = 'detection%s_%s' % (count, square_count)
                                         data[detection_name] = {
                                             'fname1': str(fname1),
@@ -302,17 +347,30 @@ def run_folders(args, detector):
                                         #data = str(date) + ',' + fname1 + ',' \
                                         #    + ',' + fname2 + str(avg)
 
-                                        avg_size = round(np.mean(avg), 2)
-                                        motion_text = "Size is: %s m" \
-                                                % (avg_size)
-                                        cv2.putText(img1,
-                                            motion_text,
-                                            (sq1.lower_x,
-                                             sq1.lower_y - 30),
-                                            cv2.FONT_HERSHEY_SIMPLEX, 2,
-                                            (0, 0, 255))
+                                        size = round(size, 2)
+                                        pose_line += "," + str(size)
+                                        f_pose.write(pose_line + '\n')
+                                        motion_text = "Size: %s m" \
+                                                % (size)
+
+                                        #print(points4dT)
+                                        #print(np.subtract(points4dT[0], points4dT[2]))
+                                        print(motion_text)
+
+                                        # cv2.putText(img1,
+                                        #     motion_text,
+                                        #     (sq1.lower_x,
+                                        #      sq1.lower_y - 30),
+                                        #     cv2.FONT_HERSHEY_SIMPLEX, 2,
+                                        #     (0, 0, 255), 8)
 
                                         #SP.draw_images(img1, img2, wait=0)
+
+                                        #cv2.imshow("img1", img1)
+                                        #k = cv2.waitKey(0)
+                                        #if k == 13:
+                                        name = "final_report_best_images2/" + fname1.split('/')[-1]
+                                        cv2.imwrite(name, img1)
 
                                         size_p1 = points4d[:, 0]
                                         size_p2 = points4d[:, 2]
@@ -322,6 +380,8 @@ def run_folders(args, detector):
 
                                         temporal_square1.append_squares(sq1)
                                         temporal_square2.append_squares(sq2)
+
+                                        #SP.draw_images(img1, img2, wait=0)
 
                                         #print(square_count, len(temporal_square1.squares_list))
 
@@ -346,11 +406,11 @@ def run_folders(args, detector):
 
                                             if prev_sq1 is not None and prev_sq2 is not None:
 
-                                                SP.draw_circles(img1, prev_sq1,
-                                                                color=(0, 255, 0))
+                                                #SP.draw_circles(img1, prev_sq1,
+                                            #                    color=(0, 255, 0))
 
-                                                SP.draw_circles(img2, prev_sq2,
-                                                                color=(0, 255, 0))
+                                                # SP.draw_circles(img2, prev_sq2,
+                                                #                 color=(0, 255, 0))
 
                                                 prev_points4d = find_points(
                                                     EI_loader, prev_sq1, prev_sq2)
@@ -361,27 +421,42 @@ def run_folders(args, detector):
 
                                                 motion = np.subtract(avg, prev_avg)
 
+
+
                                                 data[detection_name]['motion'] = motion.tolist()
 
                                                 speed = np.divide(motion,
                                                     time_elap)
                                                 avg_speed = round(
                                                     np.linalg.norm(speed), 2)
+
+                                                speed_line = str(count) + "," + str(square_count) + "," + str(speed[0]) + " " + str(speed[1]) + " " + str(speed[2])
+                                                s_pose.write(speed_line + '\n')
                                                 #print("speed", speed)
                                                 #print("avg speed", avg_speed)
 
-                                                speed_text = "Speed is: %s m/s" \
+                                                speed_text = "Speed: %s m/s" \
                                                     % (avg_speed)
 
 
-                                                cv2.putText(img1,
-                                                    speed_text,
-                                                    (sq1.lower_x + 30,
-                                                     sq1.lower_y + 30),
-                                                    cv2.FONT_HERSHEY_SIMPLEX, 2,
-                                                    255)
+                                                # cv2.putText(img1,
+                                                #     speed_text,
+                                                #     (sq1.lower_x + 0,
+                                                #      sq1.upper_y + 80),
+                                                #     cv2.FONT_HERSHEY_SIMPLEX, 2,
+                                                #     255, 8)
 
-                                        SP.draw_images(img1, img2, wait=1)
+                                        #cv2.imwrite("img.png", img1)
+
+                                        #SP.draw_images(img1, img2, wait=0)
+                                        cv2.imshow("img1", img1)
+                                        k = cv2.waitKey(0)
+                                        if k == 13:
+                                            name = "failed_correspondance/" + fname1.split('/')[-1]
+                                            name2 = "failed_correspondance/2" + fname2.split('/')[-1]
+                                            cv2.imwrite(name, img1)
+                                            cv2.imwrite(name2, img2)
+
 
 
 
@@ -389,11 +464,12 @@ def run_folders(args, detector):
                                 prev_temporal_sq2 = temporal_square2
                 file = "size_speed_test/%s.json" % (date)
                 with open(file, 'w') as outfile:
-                    json.dump(data, outfile)
+                    #json.dump(data, outfile)
+                    pass
 
 
 def run_txt_file(args, detector):
-    start_date = ' '
+    start_date = '2018_10_27 14_24_37'
     ac = ampCommon(time_delay_allowed=0.05)
 
     SP = StereoProcessing(args, detector)
@@ -440,7 +516,6 @@ def run_txt_file(args, detector):
                     SP.draw_circles(img1, sq1)
                     SP.draw_circles(img2, sq2)
 
-                    SP.draw_images(img1, img2, wait=0)
                     #
                     #
                     # points4d = find_points(EI_loader,
@@ -534,8 +609,8 @@ if __name__ == '__main__':
     pause = 0.01
 
     detector = YoloLiveVideoStream(args)
-    detector.display = False
-    detector.write_images = False
+    detector.display = True
+    detector.write_images = True
 
     if args.run_txt_file:
         run_txt_file(args, detector)

@@ -83,7 +83,7 @@ class CvSquare:
 class ampCommon:
     def __init__(self, time_delay_allowed=0.05):
         self.time_delay_allowed = time_delay_allowed
-        
+
     def relative_time_diff(self, f1, f2):
         """
         Verify that image timestamps are less than time_delay_allowed apart
@@ -138,13 +138,18 @@ class ampCommon:
 
     def find_date(self, images, i):
         fname1 = images[i][0]
+        #print(2)
+        #print(fname1)
         fname2 = images[0][1]
         prevtime_diff = self.time_diff(fname1, fname2)
 
         for loc in range(0, len(images)):
-            if self._check_day_hour(fname1, images[loc][1]):
+            #print(fname1.split('/')[-1], images[loc][1].split('/')[-1])
+            #print(self._check_day_hour2(fname1, images[loc][1]))
+            if self._check_day_hour2(fname1, images[loc][1]):
                 if self._check_date(fname1, images[loc][1]):
-
+                    #print("return")
+                    #print(fname1.split('/')[-1], fname2.split('/')[-1])
                     return fname1, images[loc][1]
                 if self.time_diff(fname1, images[loc][1]) > prevtime_diff:
                     # Diverging, break
@@ -217,6 +222,29 @@ class ampCommon:
         day1 = '_'.join(day1[:6])
         day2 = f2.split('/')[-1].split('_')
         day2 = '_'.join(day2[:6])
+        #print("DAY")
+        #print(day1, day2)
+        if day1 == day2:
+            return True
+
+        return False
+
+    def _check_day_hour2(self, f1, f2, folder_count=5):
+        """
+        Verify that image timestamps are less than time_delay_allowed apart
+        Inputs:
+            f1(str): Frame1 name
+            f2(str): Frame2 name
+
+        Return:
+            Bool: If timestamps are close enough together
+        """
+        day1 = f1.split('/')[-1].split('_')
+        day1 = '_'.join(day1[:folder_count])
+        day2 = f2.split('/')[-1].split('_')
+        day2 = '_'.join(day2[:folder_count])
+        #print("DAY")
+        #print(day1, day2)
         if day1 == day2:
             return True
 

@@ -70,6 +70,7 @@ def main():
     EI_loader = ExtrinsicIntrnsicLoaderSaver(loader)
     PI = PointIdentification3D(EI_loader)
     points4D = PI.get_points(copy.copy(img1), copy.copy(img2))
+    points4D/=points4D[3]
     print("4D points: ", points4D)
 
     distance = calculate_distances(points4D)

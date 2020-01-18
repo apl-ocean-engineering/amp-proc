@@ -8,3 +8,6 @@ scripts/size_speed_test/
 scripts/*.avi
 WAMP_acoustic_review/
 WETS_stereo_data_review/
+scripts/failed_correspondance/
+scripts/final_report_best_images/
+scripts/final_report_best_images2/
