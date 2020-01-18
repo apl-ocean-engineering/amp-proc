@@ -156,9 +156,15 @@ class StereoProcessing:
         self.parse_waitKey(k)
 
     def test_square_overlap(self, sq2, square1_list, sq2_init = None, img1=None, img2=None,
-                            class_list = None, ignore_name='ignore',):
+                            class_list = None, ignore_name='ignore', min_overlap = 0.0):
         #self.draw_circles(img1, sq2, color=(0,0,255))
+        overlap_found = False
+        max_overlap = -1
+        found_index = -1
+        return_square = None
+        overlap = []
         for i, sq1 in enumerate(square1_list):
+
             if class_list is not None:
                 if class_list[i] == ignore_name:
                     continue
@@ -169,7 +175,7 @@ class StereoProcessing:
             p2 = self.construct_polygon(sq2)
 
             if p1.intersects(p2):
-
+                #print(i)
                 max_area = max(p1.area, p2.area)
                 # print(max_area)
                 overlap_over_area = p1.intersection(p2).area / max_area
@@ -177,13 +183,23 @@ class StereoProcessing:
                 if sq2_init is not None:
                     p2_init = self.construct_polygon(sq2_init)
                     #print(min(p2_init.area, p1.area)/ max(p2_init.area, p1.area))
-                    if min(p2_init.area, p1.area)/ max(p2_init.area, p1.area) < 0.58:
+                    if min(p2_init.area, p1.area)/ max(p2_init.area, p1.area) < min_overlap:
+                        return False, None, -1, overlap
+                if overlap_over_area > self.OVERLAP_THRESHOLD and overlap_over_area > max_overlap:
+                    #return True, sq1, i
+                    max_overlap = overlap_over_area
+                    found_index = i
+                    return_square = sq1
 
-                        return False, None, -1
-                if overlap_over_area > self.OVERLAP_THRESHOLD:
-                    return True, sq1, i
+                    overlap_found = True
+                    overlap.append(overlap_over_area)
+                    continue
 
-        return False, None, -1
+        #return False, None, -1, overlap
+        # print(overlap)
+        # print(max_overlap)
+        return overlap_found, return_square, found_index, max_overlap
+
 
     def deconstruct_square(self, sq):
         lower_left = (sq.lower_x, sq.lower_y)
@@ -234,12 +250,17 @@ class StereoProcessing:
                                class_list = None, ignore_name='ignore',
                                show_YOLO=False, args=None):
         square_information = []
+
         # print("corresponding")
         for sq2_ind, sq2 in enumerate(squares2):
+            #cv2.waitKey(0)
+            max_overlap = -1
+            #print(sq2_ind)
             if sq2.lower_x < 10:
                 continue
             if class_list is not None:
                 if class_list[1][sq2_ind] == ignore_name:
+
                     continue
             # print(sq2_ind)
             skip = False
@@ -254,11 +275,16 @@ class StereoProcessing:
             while valid:
                 if sq2.travel > self.TRAVEL_MAX:
                     break
-                overlap, sq1, sq1_ind = self.test_square_overlap(
+                overlap, sq1, sq1_ind, overlap_val = self.test_square_overlap(
                     sq2, squares1, sq2_init = sq2_init,
                     img1=img1, img2=img2, class_list=class_list[0], ignore_name=ignore_name)
                 if overlap:
-                    square_information.append((overlap, sq1, sq2_init, sq1_ind, sq2_ind))
+                    #print('overlap')
+                    #print(overlap_val)
+                    if overlap_val > max_overlap:
+                        max_overlap = overlap_val
+                        square_information.append([overlap_val, sq1, sq2_init, sq1_ind, sq2_ind])
+                    #square_information.append((overlap_list[0], sq1, sq2_init, sq1_ind, sq2_ind))
                     skip = True
                     break
                 valid = sq2.move_square()
@@ -269,15 +295,21 @@ class StereoProcessing:
             while valid and not skip:
                 if sq2.travel > self.TRAVEL_MAX:
                     break
-                overlap, sq1, sq1_ind = self.test_square_overlap(
-                    sq2, squares1, sq2_init =  sq2_init,
-                    img1=img1, img2=img2)
+                overlap, sq1, sq1_ind, overlap_val = self.test_square_overlap(
+                    sq2, squares1, sq2_init = sq2_init,
+                    img1=img1, img2=img2, class_list=class_list[0], ignore_name=ignore_name)
                 if overlap:
-                    square_information.append((overlap, sq1, sq2_init, sq1_ind, sq2_ind))
+                    #print('overlap')
+                    #print(overlap_val)
+                    if overlap_val > max_overlap:
+                        max_overlap = overlap_val
+                        square_information.append([overlap_val, sq1, sq2_init, sq1_ind, sq2_ind])
+                    #square_information.append((overlap_list[0], sq1, sq2_init, sq1_ind, sq2_ind))
                     break
-                valid = sq2.move_square()
+                valid = sq2.move_square(motion=-self.X_MOTION)
 
-        return square_information
+        #print(square_information)
+        return sorted(square_information, reverse = True,  key=lambda x:x[0] )
 
     def check_stereo_detection(self, squares1, squares2, img1=None, img2=None,
                                show_YOLO=False, args=None):
@@ -417,8 +449,9 @@ class StereoProcessing:
         #     squares1, squares2, img1=img1, img2=img2,
         #     show_YOLO=False)
         detections = self.corresponding_squares(squares1, squares2,
-            img1=img1, img2=img2, class_list=[class_list1,class_list2] , ignore_name='fish',
+            img1=img1, img2=img2, class_list=[class_list1,class_list2] , ignore_name='_fish',
             show_YOLO=False)
+        #print(detections)
         if detections != []:
             #detections = sorted(detections)
             #if sq1 is not None and sq2 is not None:

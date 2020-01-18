@@ -14,7 +14,7 @@ for jfile in json_files:
             img1 = cv2.imread(fname1.rstrip())
             img2 = cv2.imread(fname2.rstrip())
             cv2.imshow("img1", img1)
-            cv2.waitKey(0)
+            cv2.waitKey(1000)
             sq1_pose = detection_data['sq1_pose']
             sq2_pose = detection_data['sq2_pose']
             detection_size = detection_data['detection_size']
