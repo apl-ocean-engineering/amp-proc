@@ -402,18 +402,20 @@ class StereoProcessing:
         if img1 is None or img2 is None:
             return False
 
-        detection1, squares1, _ = self.get_detection_squares(
+        detection1, squares1, un_adj_sqs, class_list1 = self.get_detection_squares(
                 img1)
 
-        detection2, squares2, _ = self.get_detection_squares(
+        detection2, squares2, un_adj_sqs2, class_list2 = self.get_detection_squares(
                 img2)
 
         obj_found = self.detection(
             detection1, detection2, squares1, squares2,
             img1, img2)
 
-
-        return obj_found
+        if obj_found:
+            return True, squares1, squares2, class_list1, class_list2
+        else:
+            return False, None, None, None, None
 
 
     def find_correspondance(self, img1, img2 = None):
